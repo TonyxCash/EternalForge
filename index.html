@@ -20,7 +20,7 @@
 .rotate{display:none}@media(orientation:portrait){.rotate{position:fixed;inset:0;z-index:20;background:#091321;display:flex;align-items:center;justify-content:center;text-align:center;padding:28px;font-size:18px;flex-direction:column}.rotate small{font-size:12px;color:#bdc9d8;margin-top:10px}.hud{opacity:.12}}
 @media(max-height:430px){.joystick{width:98px;height:98px}.stick{width:42px;height:42px}.action{width:55px;height:55px}.action.primary{width:68px;height:68px}.player-panel{margin-top:5px}.quest{padding:6px 12px}}
 </style>
-<script type="importmap">{"imports":{"three":"https://esm.sh/three@0.160.0"}}</script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 </head>
 <body>
 <div id="game"></div><div class="rotate">↻ Ruota l’iPhone in orizzontale<small>EternalForge è progettato per la modalità landscape.</small></div>
@@ -37,7 +37,7 @@
 </div>
 <div id="toast"></div><div id="boss"><div class="enemy-name">CREATURA CORROTTA</div><div class="enemybar"><i id="enemyhp"></i></div></div>
 <script type="module">
-import * as THREE from 'https://esm.sh/three@0.160.0';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
 const $=s=>document.querySelector(s),root=$('#game');
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x91a9b5);scene.fog=new THREE.Fog(0x91a9b5,24,70);
@@ -109,7 +109,7 @@ for(const side of [-1,1]){
 
 // Load a real rigged humanoid GLB; keep the primitive prototype only as fallback.
 const semiDragonAssetUrl='https://raw.githubusercontent.com/programasweights/avatar/main/public/assets/character.glb?v=2';
-import('https://esm.sh/three@0.160.0/examples/jsm/loaders/GLTFLoader.js?external=three').then(({GLTFLoader})=>{
+import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js').then(({GLTFLoader})=>{
 const semiDragonLoader=new GLTFLoader();
 semiDragonLoader.load(semiDragonAssetUrl,(gltf)=>{
   const model=gltf.scene;
