@@ -107,44 +107,7 @@ for(const side of [-1,1]){
   semiDragonWings.push(wing);
 }
 
-// Load and normalize the humanoid inside a wrapper, preserving the GLB's original transforms.
-const semiDragonAssetUrl='https://raw.githubusercontent.com/programasweights/avatar/main/public/assets/character.glb?v=3';
-import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js').then(({GLTFLoader})=>{
-  const loader=new GLTFLoader();
-  loader.load(semiDragonAssetUrl,(gltf)=>{
-    const model=gltf.scene;
-    const characterRoot=new THREE.Group();
-    characterRoot.add(model);
-    model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(o.material){o.material.roughness=Math.max(.42,o.material.roughness??.6);}}});
-    // Measure the complete imported hierarchy before scaling the wrapper.
-    const bounds=new THREE.Box3().setFromObject(characterRoot);
-    const size=bounds.getSize(new THREE.Vector3());
-    const center=bounds.getCenter(new THREE.Vector3());
-    const targetHeight=1.95;
-    const scale=targetHeight/Math.max(size.y,.001);
-    characterRoot.scale.setScalar(scale);
-    characterRoot.position.set(-center.x*scale,-bounds.min.y*scale,-center.z*scale);
-    // Hide the prototype only after the correctly normalized model is ready.
-    for(const child of [...hero.children]) child.visible=false;
-    hero.add(characterRoot);
-    hero.userData.realCharacter=characterRoot;
-    hero.userData.characterLoaded=true;
-    const wingMat=new THREE.MeshStandardMaterial({color:0x354d50,roughness:.82,side:THREE.DoubleSide});
-    const wingGold=new THREE.MeshStandardMaterial({color:0x9d7847,metalness:.25,roughness:.65});
-    for(const side of [-1,1]){
-      const wing=new THREE.Group();
-      wing.position.set(side*.22,1.38,-.18);
-      wing.rotation.z=-side*.22;
-      const shape=new THREE.Shape();
-      shape.moveTo(0,0);shape.lineTo(side*.16,.14);shape.lineTo(side*.23,.02);shape.lineTo(side*.15,-.15);shape.lineTo(0,-.1);shape.closePath();
-      wing.add(new THREE.Mesh(new THREE.ShapeGeometry(shape),wingMat));
-      const bone=new THREE.Mesh(new THREE.CylinderGeometry(.014,.01,.25,6),wingGold);
-      bone.position.set(side*.1,-.01,.012);bone.rotation.z=-side*.42;wing.add(bone);
-      characterRoot.add(wing);
-    }
-    toast('Semi-Drago caricato');
-  },undefined,(err)=>{console.error('Semi-Drago GLB non caricato:',err);toast('Modello non disponibile: uso il personaggio provvisorio')});
-}).catch(err=>{console.error('GLTFLoader non disponibile:',err);toast('Caricamento personaggio non riuscito')});
+// External humanoid disabled: keep the complete in-game character visible until a verified rig is integrated.
 const shadow=new THREE.Mesh(new THREE.CircleGeometry(.65,24),new THREE.MeshBasicMaterial({color:0x071018,transparent:true,opacity:.28}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.025;hero.add(shadow);
 const mobs=[];const mobMaterial=mat(0x713b45,.7),mobDark=mat(0x351d2a),eyeMaterial=new THREE.MeshBasicMaterial({color:0xff6559});
 function spawnMob(x,z,index){const g=new THREE.Group();scene.add(g);const body=new THREE.Group();body.position.y=.72;g.add(body);mesh(body,new THREE.DodecahedronGeometry(.58,1),mobMaterial,[0,0,0]);mesh(body,new THREE.ConeGeometry(.16,.48,6),mobDark,[-.34,.42,0]);mesh(body,new THREE.ConeGeometry(.16,.48,6),mobDark,[.34,.42,0]);for(const xx of [-.2,.2])mesh(body,new THREE.SphereGeometry(.07,8,6),eyeMaterial,[xx,.1,.49]);const legs=[];for(const xx of [-.24,.24]){const l=new THREE.Group();l.position.set(xx,.35,0);g.add(l);mesh(l,new THREE.CapsuleGeometry(.09,.35,3,6),mobDark,[0,-.2,0]);legs.push(l)}mobs.push({g,body,legs,hp:3,maxHp:3,alive:true,phase:index*.9,attack:0,hit:0,walk:0})}
