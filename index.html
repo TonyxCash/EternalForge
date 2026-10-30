@@ -37,6 +37,7 @@
 <div id="toast"></div><div id="boss"><div class="enemy-name">CREATURA CORROTTA</div><div class="enemybar"><i id="enemyhp"></i></div></div>
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
 const $=s=>document.querySelector(s),root=$('#game');
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x91a9b5);scene.fog=new THREE.Fog(0x91a9b5,24,70);
 const camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,.1,140);camera.position.set(0,7,11);
@@ -104,6 +105,48 @@ for(const side of [-1,1]){
   spar.rotation.z=side*-.48;
   semiDragonWings.push(wing);
 }
+
+// Load a real rigged humanoid GLB; keep the primitive prototype only as fallback.
+const semiDragonAssetUrl='https://raw.githubusercontent.com/programasweights/avatar/main/public/assets/character.glb';
+const semiDragonLoader=new GLTFLoader();
+semiDragonLoader.load(semiDragonAssetUrl,(gltf)=>{
+  const model=gltf.scene;
+  const bounds=new THREE.Box3().setFromObject(model);
+  const size=bounds.getSize(new THREE.Vector3());
+  const center=bounds.getCenter(new THREE.Vector3());
+  const targetHeight=2.15;
+  const scale=targetHeight/Math.max(size.y,.001);
+  model.scale.setScalar(scale);
+  model.position.set(-center.x*scale,-bounds.min.y*scale,-center.z*scale);
+  model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(o.material){o.material.roughness=Math.max(.42,o.material.roughness??.6);}}});
+  // Hide the old blockout only after the real model has loaded successfully.
+  for(const child of [...hero.children]) child.visible=false;
+  hero.add(model);
+  hero.userData.realCharacter=model;
+  hero.userData.characterLoaded=true;
+  // Compact folded dragon wings, attached behind the shoulder line.
+  const wingMat=new THREE.MeshStandardMaterial({color:0x354d50,roughness:.82,side:THREE.DoubleSide});
+  const wingGold=new THREE.MeshStandardMaterial({color:0x9d7847,metalness:.25,roughness:.65});
+  for(const side of [-1,1]){
+    const wing=new THREE.Group();
+    wing.position.set(side*.25,1.48,-.22);
+    wing.rotation.z=-side*.22;
+    const shape=new THREE.Shape();
+    shape.moveTo(0,0);shape.lineTo(side*.19,.16);shape.lineTo(side*.27,.03);shape.lineTo(side*.18,-.17);shape.lineTo(0,-.12);shape.closePath();
+    const membrane=new THREE.Mesh(new THREE.ShapeGeometry(shape),wingMat);
+    wing.add(membrane);
+    const bone=new THREE.Mesh(new THREE.CylinderGeometry(.018,.012,.3,6),wingGold);
+    bone.position.set(side*.12,-.015,.012);bone.rotation.z=-side*.42;wing.add(bone);
+    model.add(wing);
+  }
+  // Amber slit-like eyes and subtle scale accents.
+  const eyeMat=new THREE.MeshStandardMaterial({color:0xffb84e,emissive:0x8b3c08,emissiveIntensity:1.4});
+  for(const side of [-1,1]){
+    const eye=new THREE.Mesh(new THREE.SphereGeometry(.025,8,6),eyeMat);
+    eye.position.set(side*.075,1.91,.105);eye.scale.set(1,.65,.5);model.add(eye);
+  }
+  toast('Il Semi-Drago è arrivato!');
+},undefined,(err)=>{console.error('Semi-Drago GLB non caricato:',err);toast('Modello 3D non disponibile: uso il personaggio provvisorio')});
 const shadow=new THREE.Mesh(new THREE.CircleGeometry(.65,24),new THREE.MeshBasicMaterial({color:0x071018,transparent:true,opacity:.28}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.025;hero.add(shadow);
 const mobs=[];const mobMaterial=mat(0x713b45,.7),mobDark=mat(0x351d2a),eyeMaterial=new THREE.MeshBasicMaterial({color:0xff6559});
 function spawnMob(x,z,index){const g=new THREE.Group();scene.add(g);const body=new THREE.Group();body.position.y=.72;g.add(body);mesh(body,new THREE.DodecahedronGeometry(.58,1),mobMaterial,[0,0,0]);mesh(body,new THREE.ConeGeometry(.16,.48,6),mobDark,[-.34,.42,0]);mesh(body,new THREE.ConeGeometry(.16,.48,6),mobDark,[.34,.42,0]);for(const xx of [-.2,.2])mesh(body,new THREE.SphereGeometry(.07,8,6),eyeMaterial,[xx,.1,.49]);const legs=[];for(const xx of [-.24,.24]){const l=new THREE.Group();l.position.set(xx,.35,0);g.add(l);mesh(l,new THREE.CapsuleGeometry(.09,.35,3,6),mobDark,[0,-.2,0]);legs.push(l)}mobs.push({g,body,legs,hp:3,maxHp:3,alive:true,phase:index*.9,attack:0,hit:0,walk:0})}
