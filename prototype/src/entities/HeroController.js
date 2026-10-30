@@ -65,7 +65,7 @@ export class HeroController {
     }else if(this.state===HeroState.ATTACK_1||this.state===HeroState.ATTACK_2){
       this.vx*=Math.pow(.001,dt);
       if(this.buffer.consume("attack",now))this.comboQueued=true;
-      const duration=this.state===HeroState.ATTACK_1?.34:.42;
+      const duration=this.state===HeroState.ATTACK_1 ? 0.34 : 0.42;
       if(this.stateTime>=duration){
         if(this.comboQueued&&this.attackStep===1)this.enter(HeroState.ATTACK_2);
         else this.enter(this.grounded?(axis?HeroState.RUN:HeroState.IDLE):HeroState.AIR);
@@ -73,6 +73,9 @@ export class HeroController {
     }else if(this.state===HeroState.LAND){
       this.vx=axis*this.moveSpeed;
       if(this.stateTime>=.12)this.enter(axis?HeroState.RUN:HeroState.IDLE);
+    }else if(this.state===HeroState.JUMP_START){
+      this.vx=axis*this.moveSpeed;
+      if(this.stateTime>=.08)this.enter(HeroState.AIR);
     }else{
       if(this.buffer.consume("dodge",now)&&this.grounded)this.enter(HeroState.DODGE);
       else if(this.buffer.consume("jump",now)&&this.grounded){
