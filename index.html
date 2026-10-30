@@ -41,7 +41,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
 
 const $=s=>document.querySelector(s),root=$('#game');
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x91a9b5);scene.fog=new THREE.Fog(0x91a9b5,24,70);
-const camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,.1,140);camera.position.set(0,7,11);
+const camera=new THREE.PerspectiveCamera(48,innerWidth/innerHeight,.1,140);camera.position.set(0,6,9);
 const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;root.appendChild(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0xdcecff,0x46533b,1.9));const sun=new THREE.DirectionalLight(0xffe2b2,2.7);sun.position.set(-9,16,8);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-25;sun.shadow.camera.right=25;sun.shadow.camera.top=25;sun.shadow.camera.bottom=-25;scene.add(sun);
 const mat=(c,r=.7,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
@@ -75,6 +75,33 @@ const shoulderL=new THREE.Group();shoulderL.position.set(-.4,.28,0);torso.add(sh
 const shoulderR=new THREE.Group();shoulderR.position.set(.4,.28,0);torso.add(shoulderR);mesh(shoulderR,new THREE.SphereGeometry(.2,8,8),gold,[0,0,0]);mesh(shoulderR,new THREE.CapsuleGeometry(.105,.43,4,7),armor,[0,-.29,0]);
 const legL=new THREE.Group();legL.position.set(-.2,.82,0);hero.add(legL);mesh(legL,new THREE.CapsuleGeometry(.12,.48,4,7),cloth,[0,-.27,0]);mesh(legL,new THREE.BoxGeometry(.27,.16,.4),dark,[0,-.59,.1]);
 const legR=new THREE.Group();legR.position.set(.2,.82,0);hero.add(legR);mesh(legR,new THREE.CapsuleGeometry(.12,.48,4,7),cloth,[0,-.27,0]);mesh(legR,new THREE.BoxGeometry(.27,.16,.4),dark,[0,-.59,.1]);
+// Stylized humanoid details: face, swept hair, layered armor, gauntlets and greaves.
+const hair=mat(0x25202a,.82),skinLight=mat(0xe4b995,.8),leather=mat(0x4b3028,.9),steel=mat(0x82939a,.34,.72);
+mesh(torso,new THREE.SphereGeometry(.265,14,10,0,Math.PI*2,0,Math.PI*.56),hair,[0,.755,-.015]);
+mesh(torso,new THREE.BoxGeometry(.34,.12,.29),hair,[0,.54,-.12]);
+mesh(torso,new THREE.CapsuleGeometry(.075,.13,4,8),skinLight,[0,.42,.015]);
+for(const side of [-1,1]){
+  mesh(torso,new THREE.SphereGeometry(.035,8,6),skinLight,[side*.245,.61,0]);
+  mesh(torso,new THREE.SphereGeometry(.025,8,6),mat(0x29232a),[side*.09,.665,.224]);
+  mesh(torso,new THREE.BoxGeometry(.075,.018,.035),hair,[side*.09,.704,.22]);
+}
+mesh(torso,new THREE.ConeGeometry(.035,.09,6),skinLight,[0,.59,.245]).rotation.x=Math.PI/2;
+mesh(torso,new THREE.BoxGeometry(.48,.48,.12),steel,[0,.02,.245]);
+mesh(torso,new THREE.BoxGeometry(.38,.12,.14),gold,[0,-.24,.235]);
+for(const side of [-1,1]){
+  const arm=side<0?shoulderL:shoulderR;
+  mesh(arm,new THREE.CapsuleGeometry(.085,.28,4,7),skin,[0,-.57,.015]);
+  mesh(arm,new THREE.CapsuleGeometry(.12,.18,4,7),armor,[0,-.61,.015]);
+  mesh(arm,new THREE.SphereGeometry(.105,9,7),gold,[0,-.76,.045]);
+  const leg=side<0?legL:legR;
+  mesh(leg,new THREE.CapsuleGeometry(.135,.25,4,7),armor,[0,-.34,-.005]);
+  mesh(leg,new THREE.BoxGeometry(.29,.13,.32),steel,[0,-.43,.02]);
+  mesh(leg,new THREE.BoxGeometry(.31,.09,.38),leather,[0,-.58,.13]);
+}
+// A short mantle and belt break up the silhouette without hiding the humanoid form.
+const mantle=mesh(torso,new THREE.ConeGeometry(.43,.46,8),cloth,[0,-.28,-.13]);mantle.rotation.x=Math.PI;
+mesh(torso,new THREE.TorusGeometry(.29,.035,6,16),gold,[0,-.23,.02]).rotation.x=Math.PI/2;
+
 const swordPivot=new THREE.Group();swordPivot.position.set(.48,.28,0);shoulderR.add(swordPivot);const sword=new THREE.Group();sword.position.set(0,-.48,.08);swordPivot.add(sword);mesh(sword,new THREE.BoxGeometry(.105,.95,.065),mat(0xc8e4ef,.16,.9),[0,.48,0]);mesh(sword,new THREE.ConeGeometry(.075,.2,4),mat(0xc8e4ef,.16,.9),[0,1.04,0]);mesh(sword,new THREE.BoxGeometry(.38,.08,.13),gold,[0,.05,0]);mesh(sword,new THREE.CylinderGeometry(.07,.07,.28,8),dark,[0,-.13,0]);
 
 // Semi-Dragon class: subtle reptilian eyes, discreet scales and compact folded wings.
@@ -130,7 +157,7 @@ const stride=moving?Math.sin(gameTime*(keys.shift?13:9))*Math.min(1,Math.hypot(h
 attackCd=Math.max(0,attackCd-dt);skillCd=Math.max(0,skillCd-dt);dodgeCd=Math.max(0,dodgeCd-dt);comboWindow=Math.max(0,comboWindow-dt);swordPivot.rotation.x=THREE.MathUtils.damp(swordPivot.rotation.x,0,13,dt);swordPivot.rotation.z=THREE.MathUtils.damp(swordPivot.rotation.z,0,13,dt);if(hero.userData.forgeGlow>0){hero.userData.forgeGlow-=dt;gold.emissive.setHex(0x9b6b19);gold.emissiveIntensity=.4}else{gold.emissive.setHex(0x000000);gold.emissiveIntensity=0}
 for(const m of mobs){if(!m.alive)continue;m.phase+=dt*2.4;m.body.position.y=.72+Math.sin(m.phase)*.055;const delta=hero.position.clone().sub(m.g.position),d=delta.length();if(d<10&&d>1.45){delta.normalize();m.g.position.addScaledVector(delta,dt*1.05);m.g.rotation.y=Math.atan2(delta.x,delta.z);m.walk+=dt*8;m.legs[0].rotation.x=Math.sin(m.walk)*.35;m.legs[1].rotation.x=-Math.sin(m.walk)*.35}if(d<1.65&&m.attack<=0){m.attack=1.35;if(hero.userData.dodge<=0){hp=Math.max(0,hp-7);$('#hp').style.width=hp+'%';toast('Hai subito un colpo!');audio(95,.16,'square',.035);if(hp<=0){hp=100;hero.position.set(0,0,0);toast('Sei stato sconfitto · ritorno alla radura')}}}m.attack=Math.max(0,m.attack-dt);m.hit=Math.max(0,m.hit-dt);m.body.rotation.x=THREE.MathUtils.damp(m.body.rotation.x,m.hit>0?-.3:0,18,dt)}
 for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.life-=dt;p.o.position.addScaledVector(p.v,dt);p.v.y-=5*dt;p.o.material.opacity=Math.max(0,p.life/p.max);p.o.scale.setScalar(Math.max(.05,p.life/p.max));if(p.life<=0){scene.remove(p.o);p.o.geometry.dispose();p.o.material.dispose();particles.splice(i,1)}}
-camDesired.set(hero.position.x,hero.position.y+6.6,hero.position.z+9.4);camera.position.lerp(camDesired,1-Math.exp(-4.5*dt));camTarget.set(hero.position.x,1.1,hero.position.z);camera.lookAt(camTarget);if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)$('#toast').classList.remove('show')}mp=Math.min(70,mp+dt*1.7);$('#mp').style.width=(mp/70*100)+'%';}
+camDesired.set(hero.position.x,hero.position.y+5.5,hero.position.z+8.2);camera.position.lerp(camDesired,1-Math.exp(-4.5*dt));camTarget.set(hero.position.x,1.05,hero.position.z);camera.lookAt(camTarget);if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)$('#toast').classList.remove('show')}mp=Math.min(70,mp+dt*1.7);$('#mp').style.width=(mp/70*100)+'%';}
 function loop(){requestAnimationFrame(loop);const dt=Math.min(clock.getDelta(),.04);update(dt);renderer.render(scene,camera);frames++;fpsElapsed+=dt;if(fpsElapsed>=1){$('#fps').textContent=frames;frames=0;fpsElapsed=0}}
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.7))});hud();toast('Benvenuto nella radura di Ashenvale');loop();
 </script>
