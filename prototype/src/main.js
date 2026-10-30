@@ -1,6 +1,17 @@
 import { BootScene } from "./scenes/BootScene.js";
 import { CombatScene } from "./scenes/CombatScene.js";
 
+ // Compatibility guard: older cached hero renderers used Canvas-style
+ // quadraticCurveTo on Phaser Graphics. Phaser Graphics does not expose it.
+ // Keep the game booting and preserve the path with a straight segment.
+ if (window.Phaser?.GameObjects?.Graphics &&
+     typeof Phaser.GameObjects.Graphics.prototype.quadraticCurveTo !== "function") {
+   Phaser.GameObjects.Graphics.prototype.quadraticCurveTo = function(_cx, _cy, x, y) {
+     this.lineTo(x, y);
+     return this;
+   };
+ }
+
 const game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: "game-root",
