@@ -36,7 +36,7 @@
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js" onerror="showBootError('Impossibile caricare Phaser dal CDN. Controlla la connessione.')"></script>
   <script type="module">
     if(!window.Phaser){showBootError('Phaser non disponibile.');}
-    else import('./src/main.js').then(()=>{document.getElementById('boot-status').textContent='Motore avviato';document.getElementById('state-readout').textContent='STATO: IDLE';}).catch(e=>showBootError(e.stack||e));
+    else import('./src/main.js?v=20261030b').then(()=>{document.getElementById('boot-status').textContent='Motore avviato';document.getElementById('state-readout').textContent='STATO: IDLE';}).catch(e=>showBootError(e.stack||e));
   </script>
 </body>
 </html>
