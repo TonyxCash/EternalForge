@@ -50,9 +50,9 @@ export class HeroController {
     // Ground shadow and long draconic tail, drawn behind the body.
     g.fillStyle(0x020711,.48);g.fillEllipse(0,45,66,13);
     g.lineStyle(8,0x101c30,1);g.beginPath();
-    g.moveTo(-7,9);g.quadraticCurveTo(-27,17,-34,29);g.quadraticCurveTo(-47,39,-57,27);g.strokePath();
+    g.moveTo(-7,9);g.lineTo(-18,13);g.lineTo(-28,20);g.lineTo(-34,29);g.lineTo(-43,34);g.lineTo(-51,33);g.lineTo(-57,27);g.strokePath();
     g.lineStyle(4,0x315779,1);g.beginPath();
-    g.moveTo(-7,10);g.quadraticCurveTo(-27,18,-34,29);g.quadraticCurveTo(-47,39,-57,27);g.strokePath();
+    g.moveTo(-7,10);g.lineTo(-18,14);g.lineTo(-28,21);g.lineTo(-34,29);g.lineTo(-43,34);g.lineTo(-51,33);g.lineTo(-57,27);g.strokePath();
     g.fillStyle(0x4b8bb4,1);g.fillTriangle(-59,25,-52,22,-55,32);
 
     // Broad dragon wings with ribs and luminous membrane seams.
