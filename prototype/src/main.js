@@ -1,5 +1,5 @@
 import { BootScene } from "./scenes/BootScene.js";
-import { CombatScene } from "./scenes/CombatScene.js";
+import { CombatScene } from "./scenes/CombatScene.js?v=20261030d";
 
  // Compatibility guard: older cached hero renderers used Canvas-style
  // quadraticCurveTo on Phaser Graphics. Phaser Graphics does not expose it.
