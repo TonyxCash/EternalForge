@@ -1,4 +1,5 @@
 import { HeroController } from "../entities/HeroController.js";
+import { EnemyController } from "../entities/EnemyController.js";
 
 export class CombatScene extends Phaser.Scene {
   constructor(){super("CombatScene");}
@@ -6,6 +7,8 @@ export class CombatScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor("#0a1220");
     this.arena=this.add.graphics();this.drawArena();
     this.hero=new HeroController(this,this.scale.width*.34,this.scale.height*.78);
+    this.enemy=new EnemyController(this,this.scale.width*.72,this.scale.height*.78);
+    this.combatText=this.add.text(this.scale.width/2,118,"ASH KNIGHT · 100 HP",{fontFamily:"Arial",fontSize:"13px",color:"#e6b6a0",letterSpacing:2}).setOrigin(.5).setDepth(15);
     this.keys=this.input.keyboard.addKeys("A,D,LEFT,RIGHT,SPACE,J,K");
     this.touch={left:false,right:false};
     this.actionEdges={jump:false,attack:false,dodge:false};
@@ -15,7 +18,7 @@ export class CombatScene extends Phaser.Scene {
       fontFamily:"Arial",fontSize:"12px",color:"#9fb2ca",letterSpacing:3
     }).setOrigin(.5).setAlpha(.75);
     this.readout=document.getElementById("state-readout");
-    this.events.once("shutdown",()=>this.hero?.destroy());
+    this.events.once("shutdown",()=>{this.hero?.destroy();this.enemy?.destroy();});
   }
   drawArena(){
     const w=this.scale.width,h=this.scale.height,g=this.arena;g.clear();
@@ -39,6 +42,8 @@ export class CombatScene extends Phaser.Scene {
   onResize(size){
     this.drawArena();
     this.title.setPosition(size.width/2,88);
+    this.combatText?.setPosition(size.width/2,118);
+    if(this.enemy){this.enemy.groundY=size.height*.78;this.enemy.body.setY(this.enemy.groundY);}
     this.hero?.setGroundY(size.height*.78);
     if(this.hero)this.hero.x=Phaser.Math.Clamp(this.hero.x,80,size.width-80);
   }
@@ -51,6 +56,17 @@ export class CombatScene extends Phaser.Scene {
     const dodgePressed=this.actionEdges.dodge||Phaser.Input.Keyboard.JustDown(this.keys.K);
     this.actionEdges.jump=this.actionEdges.attack=this.actionEdges.dodge=false;
     this.hero.update(dt,{left,right,jumpPressed,attackPressed,dodgePressed},this.time.now);
+    if(this.enemy?.alive){
+      this.enemy.update(dt,this.hero.x);
+      const box=this.hero.hitbox.update();
+      if(box&&!this.hero.hitbox.hitTargets.has(this.enemy)){
+        const ex=this.enemy.x-14,ey=this.enemy.groundY-55;
+        if(box.x<ex+28&&box.x+box.width>ex&&box.y<ey+55&&box.y+box.height>ey){
+          if(this.enemy.takeDamage(box.damage))this.hero.hitbox.hitTargets.add(this.enemy);
+        }
+      }
+      this.combatText.setText("ASH KNIGHT · "+this.enemy.hp+" HP");
+    }else if(this.enemy){this.combatText.setText("ASH KNIGHT DEFEATED");}
     if(this.readout)this.readout.textContent="STATO: "+this.hero.state.toUpperCase().replaceAll("_"," ");
   }
 }
