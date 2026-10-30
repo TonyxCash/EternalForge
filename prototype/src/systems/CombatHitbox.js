@@ -2,11 +2,11 @@
 export class CombatHitbox {
   constructor(scene,owner){
     this.scene=scene;this.owner=owner;this.active=false;
-    this.damage=0;this.width=0;this.height=0;
+    this.damage=0;this.width=0;this.height=0;this.hitTargets=new Set();
     this.debug=scene.add.graphics().setDepth(20);
   }
   arm({damage,width,height}){
-    this.active=true;this.damage=damage;this.width=width;this.height=height;
+    this.active=true;this.damage=damage;this.width=width;this.height=height;this.hitTargets.clear();
   }
   disarm(){this.active=false;this.debug.clear();}
   update(){
