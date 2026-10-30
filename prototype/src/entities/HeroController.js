@@ -1,4 +1,7 @@
 import { InputBuffer } from "../systems/InputBuffer.js";
+import { HERO_CLIPS } from "../animation/ClipLibrary.js";
+import { AnimationTimeline } from "../systems/AnimationTimeline.js";
+import { CombatHitbox } from "../systems/CombatHitbox.js";
 
 export const HeroState = Object.freeze({
   IDLE: "idle", RUN: "run", JUMP_START: "jump_start", AIR: "air",
@@ -18,6 +21,9 @@ export class HeroController {
     this.invulnerable = 0;
     this.moveSpeed = 260; this.jumpVelocity = -590; this.gravity = 1550;
     this.body = scene.add.container(x, groundY);
+    this.timeline = new AnimationTimeline(HERO_CLIPS);
+    this.timeline.play("idle");
+    this.hitbox = new CombatHitbox(scene, this);
     this.drawPlaceholder();
   }
 
@@ -45,6 +51,8 @@ export class HeroController {
   enter(state) {
     if(this.state===state)return;
     this.state=state;this.stateTime=0;
+    this.timeline.play(state);
+    if(state!==HeroState.ATTACK_1&&state!==HeroState.ATTACK_2)this.hitbox.disarm();
     if(state===HeroState.ATTACK_1||state===HeroState.ATTACK_2){
       this.comboQueued=false;this.attackStep=state===HeroState.ATTACK_1?1:2;
     }
@@ -53,6 +61,10 @@ export class HeroController {
 
   update(dt,input,now) {
     this.stateTime+=dt;this.invulnerable=Math.max(0,this.invulnerable-dt);
+    this.timeline.update(dt,event=>{
+      if(event.type==="hit_on")this.hitbox.arm({damage:this.attackStep===1?12:20,width:this.attackStep===1?54:76,height:48});
+      if(event.type==="hit_off")this.hitbox.disarm();
+    });
     const axis=(input.right?1:0)-(input.left?1:0);
     if(axis)this.facing=axis>0?1:-1;
     if(input.attackPressed)this.request("attack",now);
@@ -97,8 +109,9 @@ export class HeroController {
     const bob=this.state===HeroState.RUN?Math.sin(this.scene.time.now*.018)*3:0;
     this.body.setPosition(this.x,this.groundY+this.y+bob);
     this.body.setScale(this.facing*(this.state===HeroState.DODGE?1.18:1),this.state===HeroState.LAND?Math.max(.84,1-this.stateTime*.8):1);
+    this.hitbox.update();
   }
 
   setGroundY(value){this.groundY=value;this.body.setY(value+this.y);}
-  destroy(){this.body.destroy(true);}
+  destroy(){this.hitbox.destroy();this.body.destroy(true);}
 }
