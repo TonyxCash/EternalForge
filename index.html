@@ -25,7 +25,7 @@ const $=id=>document.getElementById(id),canvas=$('screen'),ctx=canvas.getContext
 let W=0,H=0,DPR=1,last=0,time=0,toastTimer=0,shake=0;
 function resize(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0)}
 addEventListener('resize',resize);resize();
-const saved=(()=>{try{return JSON.parse(localStorage.getItem('eternalforge-2d-save')||'{}')}catch(e){return {}}})();
+const saved=(()=>{try{const current=localStorage.getItem('eternalforge-2d-save');if(current)return JSON.parse(current);const legacy=JSON.parse(localStorage.getItem('eternalforge-save-v1')||'{}');return {gold:legacy.gold,xp:legacy.xp,level:legacy.level,kills:legacy.kills,bossDefeated:legacy.bossDefeated,swordLevel:legacy.swordLevel,armorLevel:legacy.armorLevel,potions:legacy.potions,damage:legacy.damage}}catch(e){return {}}})();
 let gold=Number(saved.gold??120),xp=Number(saved.xp||0),level=Number(saved.level||1),kills=Number(saved.kills||0),bossDefeated=!!saved.bossDefeated,swordLevel=Number(saved.swordLevel||0),armorLevel=Number(saved.armorLevel||0),potions=Number(saved.potions??2),damage=Number(saved.damage||0);
 let hp=100,mp=70,dragonTime=0,dragonCd=0,attackCd=0,skillCd=0,dodgeCd=0,combo=0,comboWindow=0,shield=0;
 const hero={x:0,y:0,vx:0,vy:0,face:1,walk:0,attack:0,hit:0};
