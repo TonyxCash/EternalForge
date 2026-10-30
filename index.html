@@ -74,6 +74,36 @@ const shoulderR=new THREE.Group();shoulderR.position.set(.4,.28,0);torso.add(sho
 const legL=new THREE.Group();legL.position.set(-.2,.82,0);hero.add(legL);mesh(legL,new THREE.CapsuleGeometry(.12,.48,4,7),cloth,[0,-.27,0]);mesh(legL,new THREE.BoxGeometry(.27,.16,.4),dark,[0,-.59,.1]);
 const legR=new THREE.Group();legR.position.set(.2,.82,0);hero.add(legR);mesh(legR,new THREE.CapsuleGeometry(.12,.48,4,7),cloth,[0,-.27,0]);mesh(legR,new THREE.BoxGeometry(.27,.16,.4),dark,[0,-.59,.1]);
 const swordPivot=new THREE.Group();swordPivot.position.set(.48,.28,0);shoulderR.add(swordPivot);const sword=new THREE.Group();sword.position.set(0,-.48,.08);swordPivot.add(sword);mesh(sword,new THREE.BoxGeometry(.105,.95,.065),mat(0xc8e4ef,.16,.9),[0,.48,0]);mesh(sword,new THREE.ConeGeometry(.075,.2,4),mat(0xc8e4ef,.16,.9),[0,1.04,0]);mesh(sword,new THREE.BoxGeometry(.38,.08,.13),gold,[0,.05,0]);mesh(sword,new THREE.CylinderGeometry(.07,.07,.28,8),dark,[0,-.13,0]);
+
+// Semi-Dragon class: subtle reptilian eyes, discreet scales and compact folded wings.
+const dragonEyeMat=new THREE.MeshBasicMaterial({color:0xffb34d});
+for(const x of [-.105,.105]){
+  const eye=mesh(torso,new THREE.SphereGeometry(.027,8,6),dragonEyeMat,[x,.665,.224]);
+  eye.scale.set(1,.72,.55);
+}
+const scaleMat=mat(0x526b62,.42,.48);
+for(const side of [-1,1]){
+  for(let n=0;n<3;n++){
+    const s=mesh(torso,new THREE.SphereGeometry(.075,7,5),scaleMat,[side*(.29+n*.035),.12-n*.13,.205]);
+    s.scale.set(.78,.48,.24);
+  }
+}
+// Small folded wings stay within the silhouette in the normal form.
+const semiDragonWings=[];
+for(const side of [-1,1]){
+  const wing=new THREE.Group();
+  wing.position.set(side*.27,.24,-.19);
+  wing.rotation.z=side*-.16;
+  torso.add(wing);
+  const membrane=new THREE.Mesh(
+    new THREE.ShapeGeometry((()=>{const s=new THREE.Shape();s.moveTo(0,0);s.lineTo(side*.18,.12);s.lineTo(side*.28,-.08);s.lineTo(side*.14,-.25);s.lineTo(0,-.18);s.closePath();return s})()),
+    new THREE.MeshStandardMaterial({color:0x344b4c,roughness:.78,side:THREE.DoubleSide})
+  );
+  membrane.position.z=-.025;wing.add(membrane);
+  const spar=mesh(wing,new THREE.CylinderGeometry(.018,.012,.29,5),gold,[side*.12,-.055,0]);
+  spar.rotation.z=side*-.48;
+  semiDragonWings.push(wing);
+}
 const shadow=new THREE.Mesh(new THREE.CircleGeometry(.65,24),new THREE.MeshBasicMaterial({color:0x071018,transparent:true,opacity:.28}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.025;hero.add(shadow);
 const mobs=[];const mobMaterial=mat(0x713b45,.7),mobDark=mat(0x351d2a),eyeMaterial=new THREE.MeshBasicMaterial({color:0xff6559});
 function spawnMob(x,z,index){const g=new THREE.Group();scene.add(g);const body=new THREE.Group();body.position.y=.72;g.add(body);mesh(body,new THREE.DodecahedronGeometry(.58,1),mobMaterial,[0,0,0]);mesh(body,new THREE.ConeGeometry(.16,.48,6),mobDark,[-.34,.42,0]);mesh(body,new THREE.ConeGeometry(.16,.48,6),mobDark,[.34,.42,0]);for(const xx of [-.2,.2])mesh(body,new THREE.SphereGeometry(.07,8,6),eyeMaterial,[xx,.1,.49]);const legs=[];for(const xx of [-.24,.24]){const l=new THREE.Group();l.position.set(xx,.35,0);g.add(l);mesh(l,new THREE.CapsuleGeometry(.09,.35,3,6),mobDark,[0,-.2,0]);legs.push(l)}mobs.push({g,body,legs,hp:3,maxHp:3,alive:true,phase:index*.9,attack:0,hit:0,walk:0})}
