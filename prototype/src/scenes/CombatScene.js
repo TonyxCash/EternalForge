@@ -1,4 +1,4 @@
-import { HeroController } from "../entities/HeroController.js?v=20261030b";
+import { HeroController } from "../entities/HeroController.js?v=20261030d";
 import { EnemyController } from "../entities/EnemyController.js";
 
 export class CombatScene extends Phaser.Scene {
