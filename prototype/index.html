@@ -6,26 +6,37 @@
   <meta name="theme-color" content="#090e1b">
   <title>EternalForge — Rebuild Lab</title>
   <link rel="stylesheet" href="./styles.css">
+  <style>
+    #boot-error{display:none;position:fixed;z-index:99;left:12px;right:12px;top:72px;padding:14px;background:#301923;color:#fff;border:1px solid #e16b78;border-radius:10px;font:13px/1.45 system-ui;white-space:pre-wrap}
+    #boot-status{position:fixed;z-index:10;left:12px;bottom:10px;color:#b7c9df;font:10px system-ui;pointer-events:none}
+  </style>
 </head>
 <body>
   <main id="game-root" aria-label="EternalForge rebuild test"></main>
   <div class="safe-hud">
     <div class="brand">ETERNALFORGE <span>REBUILD LAB</span></div>
     <div class="hint">PROTOTIPO TECNICO · PERSONAGGIO TEMPORANEO</div>
-    <div class="state" id="state-readout">STATO: IDLE</div>
+    <div class="state" id="state-readout">AVVIO…</div>
   </div>
+  <div id="boot-error"></div><div id="boot-status">Caricamento motore…</div>
   <div class="touch-controls" aria-label="Controlli">
-    <div class="move-pad">
-      <button data-key="left" aria-label="Sinistra">◀</button>
-      <button data-key="right" aria-label="Destra">▶</button>
-    </div>
-    <div class="action-pad">
-      <button data-action="dodge">SCATTO</button>
-      <button data-action="jump">SALTO</button>
-      <button class="attack" data-action="attack">ATTACCO</button>
-    </div>
+    <div class="move-pad"><button data-key="left" aria-label="Sinistra">◀</button><button data-key="right" aria-label="Destra">▶</button></div>
+    <div class="action-pad"><button data-action="dodge">SCATTO</button><button data-action="jump">SALTO</button><button class="attack" data-action="attack">ATTACCO</button></div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
-  <script type="module" src="./src/main.js"></script>
+  <script>
+    window.showBootError = function(message){
+      const box=document.getElementById('boot-error'); box.style.display='block';
+      box.textContent='ERRORE DI AVVIO\n'+String(message);
+      document.getElementById('state-readout').textContent='ERRORE';
+      document.getElementById('boot-status').textContent='Il prototipo non è partito.';
+    };
+    window.addEventListener('error',e=>window.showBootError(e.message||e.type));
+    window.addEventListener('unhandledrejection',e=>window.showBootError(e.reason?.stack||e.reason||'Errore modulo'));
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js" onerror="showBootError('Impossibile caricare Phaser dal CDN. Controlla la connessione.')"></script>
+  <script type="module">
+    if(!window.Phaser){showBootError('Phaser non disponibile.');}
+    else import('./src/main.js').then(()=>{document.getElementById('boot-status').textContent='Motore avviato';document.getElementById('state-readout').textContent='STATO: IDLE';}).catch(e=>showBootError(e.stack||e));
+  </script>
 </body>
 </html>
